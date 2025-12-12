@@ -1,0 +1,7 @@
+{
+  "name": "Sentinella AI Monitor",
+  "description": "Adaptive, tiered AI baby monitoring system using local motion detection and Gemini Cloud analysis for distress detection.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
