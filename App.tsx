@@ -5,6 +5,11 @@ import StatusBadge from './components/StatusBadge';
 import ActivityChart from './components/ActivityChart';
 import { Camera, ShieldCheck, Activity, AlertTriangle, Play, Square, Baby, Lock, KeyRound, ChevronRight, AlertCircle, Info, Key, Check } from 'lucide-react';
 
+// Validate API key format for security
+const isValidApiKey = (key: string): boolean => {
+  return key.length >= 10 && key.length <= 100 && /^[A-Za-z0-9_-]+$/.test(key);
+};
+
 const App: React.FC = () => {
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -27,7 +32,7 @@ const App: React.FC = () => {
     // Load API Key with validation
     const storedKey = localStorage.getItem('gemini_api_key');
     // Validate stored key: must be reasonable length and contain only safe characters
-    if (storedKey && storedKey.length >= 10 && storedKey.length <= 100 && /^[A-Za-z0-9_-]+$/.test(storedKey)) {
+    if (storedKey && isValidApiKey(storedKey)) {
       setApiKey(storedKey);
     } else if (storedKey) {
       // Clear invalid stored key
@@ -51,9 +56,9 @@ const App: React.FC = () => {
   const handleSaveKey = () => {
     const sanitizedKey = tempKey.trim();
     
-    // Basic validation: Gemini API keys start with "AIza" and are typically 39 chars
-    // This is a security measure to prevent storing invalid/malicious data
-    if (sanitizedKey.length >= 10 && sanitizedKey.length <= 100) {
+    // Validate API key format to prevent storing invalid/malicious data
+    // Must be 10-100 chars and contain only alphanumeric, dash, and underscore
+    if (isValidApiKey(sanitizedKey)) {
        localStorage.setItem('gemini_api_key', sanitizedKey);
        setApiKey(sanitizedKey);
     }

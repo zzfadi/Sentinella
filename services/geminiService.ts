@@ -1,6 +1,13 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AnalysisResult, RiskLevel } from "../types";
 
+// Validate API key format to prevent injection attacks
+const validateApiKey = (apiKey: string): void => {
+  if (!apiKey || apiKey.length < 10 || apiKey.length > 100 || !/^[A-Za-z0-9_-]+$/.test(apiKey)) {
+    throw new Error("Invalid API Key format");
+  }
+};
+
 // Schema for Tier 2: Fast Analysis
 const tier2Schema = {
   type: Type.OBJECT,
@@ -26,10 +33,7 @@ const tier3Schema = {
 };
 
 export const analyzeFrameTier2 = async (apiKey: string, base64Image: string): Promise<AnalysisResult> => {
-  // Validate API key format to prevent injection attacks
-  if (!apiKey || apiKey.length < 10 || apiKey.length > 100 || !/^[A-Za-z0-9_-]+$/.test(apiKey)) {
-    throw new Error("Invalid API Key format");
-  }
+  validateApiKey(apiKey);
 
   try {
     const ai = new GoogleGenAI({ apiKey });
@@ -65,10 +69,7 @@ export const analyzeFrameTier2 = async (apiKey: string, base64Image: string): Pr
 };
 
 export const analyzeFrameTier3 = async (apiKey: string, base64Image: string): Promise<{ detailedAnalysis: string; recommendation: string }> => {
-  // Validate API key format to prevent injection attacks
-  if (!apiKey || apiKey.length < 10 || apiKey.length > 100 || !/^[A-Za-z0-9_-]+$/.test(apiKey)) {
-    throw new Error("Invalid API Key format");
-  }
+  validateApiKey(apiKey);
 
   try {
     const ai = new GoogleGenAI({ apiKey });
