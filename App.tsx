@@ -5,6 +5,11 @@ import StatusBadge from './components/StatusBadge';
 import ActivityChart from './components/ActivityChart';
 import { Camera, ShieldCheck, Activity, AlertTriangle, Play, Square, Baby, Lock, KeyRound, ChevronRight, AlertCircle, Info, Key, Check } from 'lucide-react';
 
+// Validate API key format for security
+const isValidApiKey = (key: string): boolean => {
+  return key.length >= 10 && key.length <= 100 && /^[A-Za-z0-9_-]+$/.test(key);
+};
+
 const App: React.FC = () => {
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -24,9 +29,15 @@ const App: React.FC = () => {
   const [chartData, setChartData] = useState<{ time: string; value: number }[]>([]);
 
   useEffect(() => {
-    // Load API Key
+    // Load API Key with validation
     const storedKey = localStorage.getItem('gemini_api_key');
-    if (storedKey) setApiKey(storedKey);
+    // Validate stored key: must be reasonable length and contain only safe characters
+    if (storedKey && isValidApiKey(storedKey)) {
+      setApiKey(storedKey);
+    } else if (storedKey) {
+      // Clear invalid stored key
+      localStorage.removeItem('gemini_api_key');
+    }
   }, []);
 
   // MEMOIZED HANDLERS
@@ -43,9 +54,13 @@ const App: React.FC = () => {
   }, []);
 
   const handleSaveKey = () => {
-    if (tempKey.trim().length > 0) {
-       localStorage.setItem('gemini_api_key', tempKey.trim());
-       setApiKey(tempKey.trim());
+    const sanitizedKey = tempKey.trim();
+    
+    // Validate API key format to prevent storing invalid/malicious data
+    // Must be 10-100 chars and contain only alphanumeric, dash, and underscore
+    if (isValidApiKey(sanitizedKey)) {
+       localStorage.setItem('gemini_api_key', sanitizedKey);
+       setApiKey(sanitizedKey);
     }
   };
 
@@ -79,9 +94,12 @@ const App: React.FC = () => {
                     placeholder="AIza..." 
                     value={tempKey}
                     onChange={(e) => setTempKey(e.target.value)}
+                    maxLength={100}
+                    autoComplete="off"
+                    spellCheck={false}
                     className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:bg-blue-50 outline-none transition-all font-mono text-sm"
                   />
-                  <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-xs text-blue-500 hover:text-blue-600 font-medium mt-2 flex items-center gap-1 ml-1">
+                  <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer noopener" className="text-xs text-blue-500 hover:text-blue-600 font-medium mt-2 flex items-center gap-1 ml-1">
                      Get a key from AI Studio <ChevronRight className="w-3 h-3" />
                   </a>
               </div>
